@@ -1,7 +1,7 @@
 import os
 import sys
 import xlrd
-import xlwt
+import openpyxl
 
 def createFolder(directory):
     if not os.path.exists(directory):
@@ -16,7 +16,7 @@ def isfloat(value):
 
 def run(src_folder, output_folder):
     FORMAT_EXP = '.exp'
-    FORMAT_XLS = '.xls'
+    FORMAT_XLSX = '.xlsx'
     count = 1
 
     createFolder(output_folder)
@@ -31,22 +31,22 @@ def run(src_folder, output_folder):
             print('parsing File #', count)
             count = count + 1
 
-            book = xlwt.Workbook()
-            ws = book.add_sheet('First Sheet')  # Add a sheet
-            style = xlwt.XFStyle()
-            style.num_format_str = 'general'
-
+            wb = openpyxl.Workbook()
+            ws = wb.active
             with open(fileName, 'r+') as f:
                 data = f.readlines()
                 for i in range(len(data)):
                     row = data[i].split('\t')
+                    line = []
                     for j in range(len(row)):
                         if isfloat(row[j]):
-                            ws.write(i, j, float(row[j]), style)
+                            line.append(float(row[j]))
                         else:
-                            ws.write(i, j, row[j], style)
+                            line.append(row[j])
+                    ws.append(line)
 
             newname = (name.split(FORMAT_EXP)[0])
-            book.save(output_folder + '/' + newname + FORMAT_XLS)
+            dst_filename = output_folder + '/' + newname + FORMAT_XLSX
+            wb.save(filename = dst_filename)
             f.close()
     print('parse Finished')
